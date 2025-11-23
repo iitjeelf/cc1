@@ -362,7 +362,9 @@ button:focus {
 }
 
 img.questionImg {
-  max-width: 95vw;  /* ← CHANGED: Uses 95% of viewport width */
+  max-width: 95vw;  /* ← Use viewport width */
+  width: auto;      /* ← Maintain aspect ratio */
+  height: auto;     /* ← Maintain aspect ratio */
   border-radius: 10px;
   /* Prevent image dragging and selection */
   -webkit-user-drag: none;
@@ -370,8 +372,10 @@ img.questionImg {
   -moz-user-drag: none;
   -o-user-drag: none;
   user-drag: none;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
-
 /* ===== ANIMATIONS ===== */
 .glow {
   animation: glowPulse 1.6s infinite alternate;
