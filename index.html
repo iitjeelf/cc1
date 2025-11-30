@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LFJC Online Examination - Complete System</title>
+<style>
+/* ===== BASE STYLES ===== */
+:root {
+  --primary-color: #4B0082;
+  --secondary-color: #D8BFD8;
+  --light-purple: #E6E6FA;
+  --white: #fff;
+  --black: #000;
+  --success: #32CD32;
+  --warning: #ff9900;
+  --danger: #ff6666;
+  --shadow: 0 5px 15px rgba(0,0,0,0.1);
+  --transition: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: var(--white);
+  color: var(--black);
+  line-height: 1.6;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Security protection */
+#screenshotProtection {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 2147483647;
+  pointer-events: none;
+}
+
+.screenshot-dots {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle at 30% 40%, rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle at 50% 60%, rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle at 70% 80%, rgba(255,255,255,0.02) 1px, transparent 1px),
+    radial-gradient(circle at 90% 10%, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 200px 200px;
+  animation: flicker 0.5s infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.9; }
+}
+
+/* ===== HEADER & FOOTER ===== */
+header {
+  background: linear-gradient(145deg, var(--light-purple), var(--secondary-color));
+  color: var(--primary-color);
+  text-align: center;
+  padding: 20px;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  box-shadow: var(--shadow);
+  text-shadow: 0 1px 2px var(--white);
+}
+
+footer {
+  background: var(--light-purple);
+  color: var(--primary-color);
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  z-index: 90;
+}
+
+/* ===== ACCESS SCREEN ===== */
+.access-denied {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  z-index: 10000;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.access-denied h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.access-code-input {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  width: 300px;
+  text-align: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.verify-btn {
+  background: white;
+  color: #e74c3c;
+  border: none;
+  padding: 12px 30px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.verify-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+.access-error {
+  color: #ffeb3b;
+  margin-top: 10px;
+  font-weight: 600;
+  display: none;
+}
+
+/* ===== STUDENT ENTRY SECTION ===== */
+#studentEntry {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 140px);
+  padding: 16px;
+  text-align: center;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.form-group label {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-right: 10px;
+  color: var(--primary-color);
+  width: 180px;
+  text-align: right;
+}
+
+input[type="text"], input[type="password"] {
+  padding: 12px 14px;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--primary-color);
+  outline: none;
+  min-width: 250px;
+  transition: var(--transition);
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.2);
+}
+
+input.error {
+  animation: glowRed 0.5s alternate infinite;
+  border-color: var(--danger);
+}
+
+@keyframes glowRed {
+  0% { box-shadow: 0 0 5px var(--danger); }
+  100% { box-shadow: 0 0 15px var(--danger); }
+}
+
+/* ===== BUTTON STYLES ===== */
+button {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: none;
+  border-radius: 12px;
+  transition: var(--transition);
+  box-shadow: 0 6px #aaa;
+  background: linear-gradient(to bottom, #fafaff, #dcd6f7);
+  color: var(--primary-color);
+  font-weight: 600;
+  padding: 12px 24px;
+  font-size: 18px;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0,0,0,.28);
+}
+
+button:active {
+  transform: translateY(3px) scale(.98);
+}
+
+button:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* ===== OPTION BUTTON STYLES ===== */
+.optBtn {
+  font-size: 16px;
+  padding: 8px 18px;
+  margin: 6px;
+  border: 2px solid var(--primary-color);
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 5px #aaa;
+  transition: all 0.3s ease;
+  min-width: 60px;
+}
+
+.optBtn.selected {
+  background: var(--success);
+  color: var(--white);
+  border-color: #2fa92f;
+  transform: scale(1.05);
+}
+
+.optBtn.correct {
+  background: #32CD32;
+  color: white;
+  border-color: #228B22;
+}
+
+.optBtn.wrong {
+  background: #FF6B6B;
+  color: white;
+  border-color: #DC143C;
+}
+
+.optBtn.not-attempted {
+  background: #B0B0B0;
+  color: white;
+  border-color: #808080;
+}
+
+.navBtn {
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: var(--white);
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(145deg, #1E90FF, #4682B4);
+  margin: 0 15px;
+}
+
+#markReviewBtn {
+  background: linear-gradient(145deg, #ffb84d, var(--warning));
+}
+
+#submitBtn {
+  background: linear-gradient(145deg, #c8b88a, #b49e60);
+}
+
+/* ===== TIMER STYLES ===== */
+#timerEl {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--primary-color);
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #f0f0ff;
+  display: inline-block;
+  transition: var(--transition);
+}
+
+#timerEl.blink {
+  animation: blinkTimer 1s infinite;
+}
+
+@keyframes blinkTimer {
+  0% { background: var(--danger); color: var(--white); }
+  50% { background: var(--white); color: var(--primary-color); }
+  100% { background: var(--danger); color: var(--white); }
+}
+
+/* ===== EXAM AREA LAYOUT ===== */
+#examArea {
+  display: none;
+  flex-direction: column;
+  height: calc(100vh - 140px);
+  padding: 0;
+}
+
+.exam-main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 10px;
+  padding: 10px;
+}
+
+.question-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.question-container {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== ENHANCED SIDE PALETTE STYLES ===== */
+.palette-section {
+  width: 400px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+.palette-header {
+  background: linear-gradient(145deg, var(--primary-color), #6A0DAD);
+  color: white;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.palette-container {
+  flex: 1;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-content: start;
+  justify-items: center;
+}
+
+/* ===== APPLE STYLE PALETTE BUTTONS ===== */
+.palette-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: linear-gradient(145deg, #f0f0f5, #e8e8f0);
+  border-radius: 18px; /* Perfect circle */
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  color: var(--primary-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  margin: 0;
+  padding: 0;
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.1),
+    inset 0 1px 1px rgba(255,255,255,0.8);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+}
+
+.palette-btn:hover {
+  background: linear-gradient(145deg, #e8e8f0, #e0e0e8);
+  transform: scale(1.08);
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.15),
+    inset 0 1px 2px rgba(255,255,255,0.9);
+}
+
+.palette-btn:active {
+  transform: scale(0.95);
+  box-shadow: 
+    0 1px 2px rgba(0,0,0,0.1),
+    inset 0 2px 3px rgba(0,0,0,0.1);
+}
+
+/* Selected/Answered - Apple Green */
+.palette-btn.selected {
+  background: linear-gradient(145deg, #34C759, #30B753);
+  color: white;
+  box-shadow: 
+    0 2px 6px rgba(52, 199, 89, 0.4),
+    inset 0 1px 1px rgba(255,255,255,0.3);
+}
+
+/* Marked for Review - Apple Orange */
+.palette-btn.reviewed {
+  background: linear-gradient(145deg, #FF9500, #FF8A00);
+  color: white;
+  box-shadow: 
+    0 2px 6px rgba(255, 149, 0, 0.4),
+    inset 0 1px 1px rgba(255,255,255,0.3);
+}
+
+/* Current Question - Apple Red with glow */
+.palette-btn.current {
+  background: linear-gradient(145deg, #FF3B30, #FF2D20);
+  color: white;
+  box-shadow: 
+    0 0 0 2px white,
+    0 0 0 4px #FF3B30,
+    0 4px 12px rgba(255, 59, 48, 0.6);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Not visited - Light gray */
+.palette-btn.not-visited {
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  color: #6c757d;
+  box-shadow: 
+    0 1px 2px rgba(0,0,0,0.05),
+    inset 0 1px 1px rgba(255,255,255,0.8);
+}
+
+/* Hover effects for different states */
+.palette-btn.selected:hover {
+  background: linear-gradient(145deg, #30D158, #2CC653);
+  transform: scale(1.08);
+}
+
+.palette-btn.reviewed:hover {
+  background: linear-gradient(145deg, #FF9F0A, #FF9400);
+  transform: scale(1.08);
+}
+
+.palette-btn.current:hover {
+  background: linear-gradient(145deg, #FF453A, #FF375F);
+  transform: scale(1.08);
+}
+
+/* ===== NAVIGATION POSITIONING ===== */
+.navContainer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 15px;
+  background: #f8f9fa;
+  border-top: 2px solid #E6E6FA;
+  position: fixed;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  margin-bottom: 0;
+}
+
+/* ===== FORM ASSIGNMENT STYLES ===== */
+.form-assignment {
+  background: #e8f4fd;
+  border: 2px solid #4B0082;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+.form-assignment h3 {
+  color: #4B0082;
+  margin: 0 0 10px 0;
+}
+
+.assigned-form {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4B0082;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  display: inline-block;
+  margin: 10px 0;
+}
+
+/* ===== RESUBMISSION STYLES ===== */
+#resubmissionSection {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+  display: none;
+}
+
+#resubmissionSection h3 {
+  color: #856404;
+  margin-bottom: 15px;
+}
+
+#resubmissionPassword {
+  padding: 10px;
+  border: 1px solid #ffc107;
+  border-radius: 5px;
+  margin: 10px 0;
+  width: 200px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.resubmit-btn {
+  background: linear-gradient(145deg, #ffc107, #e0a800);
+  color: #856404;
+  margin: 5px;
+  padding: 8px 16px;
+}
+
+.resubmit-btn:hover {
+  background: linear-gradient(145deg, #e0a800, #d39e00);
+  transform: translateY(-2px);
+}
+
+/* ===== RESULTS AREA STYLES ===== */
+#summaryArea, #reviewArea {
+  display: none;
+  padding: 20px;
+}
+
+.area-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.area-header h2 {
+  color: #4B0082;
+  margin-bottom: 10px;
+}
+
+.results-table, .detailed-results-table {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  border-collapse: collapse;
+  font-size: 18px;
+  text-align: center;
+}
+
+.results-table th, .detailed-results-table th {
+  background: #E6E6FA;
+  padding: 15px;
+  border: 1px solid var(--primary-color);
+}
+
+.results-table td, .detailed-results-table td {
+  padding: 15px;
+  border: 1px solid var(--primary-color);
+}
+
+.detailed-results-table th {
+  background: #4B0082;
+  color: white;
+}
+
+.detailed-results-table .total-row {
+  background: #E6E6FA !important;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+/* ===== DOWNLOAD BUTTON STYLES ===== */
+.download-section {
+  text-align: center;
+  margin: 30px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+}
+
+.download-btn {
+  background: linear-gradient(145deg, #28a745, #20c997);
+  color: white;
+  padding: 12px 30px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 10px;
+}
+
+/* ===== MODAL STYLES ===== */
+.confirmModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.confirmBox {
+  background: var(--white);
+  padding: 20px;
+  border-radius: 12px;
+  min-width: 280px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.confirmBox p {
+  font-size: 18px;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+}
+
+.confirmBox button {
+  margin: 0 10px;
+  padding: 8px 16px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#adminPassModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+}
+
+#adminPassBox {
+  background: var(--white);
+  padding: 20px;
+  text-align: center;
+  width: 260px;
+  border-radius: 12px;
+}
+
+#adminPassBox input {
+  width: 90%;
+  padding: 10px;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+/* ===== RESPONSIVE STYLES ===== */
+@media (max-width: 900px) {
+  .exam-main-content {
+    flex-direction: column;
+  }
+  
+  .palette-section {
+    width: 100%;
+    height: 180px;
+  }
+  
+  .palette-container {
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+  }
+  
+  .palette-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .form-group label {
+    text-align: left;
+    width: auto;
+    margin-bottom: 5px;
+  }
+  
+  #examHeader {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .navContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .navBtn {
+    width: 80%;
+    margin-bottom: 10px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .palette-container {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 6px;
+  }
+  
+  .palette-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+}
+
+/* ===== ERROR MESSAGE STYLES ===== */
+.error-message {
+  color: #ff3333;
+  font-weight: 600;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  background: rgba(255, 102, 102, 0.1);
+  border: 1px solid #ff6666;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid #c3e6cb;
+}
+
+/* ===== SHAKE ANIMATION ===== */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-10px); }
+}
+
+/* ===== OPTIONS CONTAINER ===== */
+.options-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+  width: 100%;
+}
+
+/* ===== QUESTION IMAGE STYLES ===== */
+.questionImg {
+  max-width: 95vw;
+  width: auto;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===== EXAM HEADER STYLES ===== */
+#examHeader {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font-weight: bold;
+  margin-bottom: 0;
+  padding: 15px;
+  background: linear-gradient(145deg, var(--light-purple), var(--secondary-color));
+  color: var(--primary-color);
+}
+
+#stuInfo {
+  flex: 0 0 auto;
+  text-align: left;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+#stuQInfo {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ===== DETAILED SOLUTIONS STYLES ===== */
+.solution-container {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  border-left: 4px solid #4B0082;
+}
+
+.solution-question {
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #4B0082;
+}
+
+.solution-answer {
+  padding: 10px;
+  border-radius: 5px;
+  margin: 5px 0;
+}
+
+.solution-correct {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.solution-wrong {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.solution-explanation {
+  background: #e2e3e5;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+/* ===== AUTO TRANSITION STYLES ===== */
+.auto-transition-message {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+  text-align: center;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Access Denied Screen - ALWAYS SHOWS FIRST -->
+<div id="accessDenied" class="access-denied">
+    <h1>ACCESS REQUIRED</h1>
+    <p>Please enter the access code to continue with the examination.</p>
+    <p>If you don't have the access code, contact your administrator.</p>
+    <input type="password" id="accessCode" class="access-code-input" placeholder="Enter Access Code">
+    <button id="verifyAccess" class="verify-btn">VERIFY ACCESS</button>
+    <div id="accessError" class="access-error">❌ Invalid access code. Please try again.</div>
+</div>
+
+<header>LFJC ONLINE EXAMINATION</header>
+
+<div id="studentEntry" style="display:none;">
+  <div class="warning-banner" id="examWarning" style="display:none;">
+    <p>⚠️ WARNING: Exam in progress. Do not refresh or close this window!</p>
+  </div>
+  
+  <div class="form-group"><label>NAME</label><input type="text" id="stuName" placeholder="Only letters & spaces" autocomplete="off"></div>
+  <div class="form-group"><label>SECTION</label><input type="text" id="stuSection" placeholder="Letters & digits" autocomplete="off"></div>
+  <div class="form-group"><label>ROLL NUMBER</label><input type="text" id="stuRoll" placeholder="Digits only" autocomplete="off"></div>
+  <div class="form-group"><label>ADMISSION NUMBER</label><input type="text" id="stuAdm" placeholder="Digits only" autocomplete="off"></div>
+
+  <!-- Form Assignment Display -->
+  <div id="formAssignment" class="form-assignment" style="display:none;">
+    <h3>📋 ASSIGNED FORM</h3>
+    <div class="assigned-form" id="assignedFormDisplay">FORM A</div>
+    <p>Your responses will be submitted to this form</p>
+  </div>
+
+  <!-- RESUBMISSION SECTION - ALWAYS VISIBLE FOR TESTING -->
+  <div id="resubmissionSection" style="display: block; background: #fff3cd; border: 2px solid #ffc107; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: center;">
+    <h3>🔄 Re-submission Required</h3>
+    <p>You have already submitted within the last 24 hours.</p>
+    <p>To submit again, please enter the re-submission password:</p>
+    <input type="password" id="resubmissionPassword" placeholder="Enter re-submission password" style="padding: 10px; border: 1px solid #ffc107; border-radius: 5px; margin: 10px 0; width: 200px; text-align: center; font-size: 16px;">
+    <div>
+      <button id="verifyResubmission" class="resubmit-btn">Verify & Re-submit</button>
+      <button id="cancelResubmission" class="resubmit-btn">Cancel</button>
+    </div>
+  </div>
+
+  <div class="form-group"><button id="stuStartBtn" style="display:none;">Start Exam</button></div>
+  <p id="studentMsg"></p>
+  <div id="errorMessages"></div>
+</div>
+
+<!-- Enhanced Exam Area with Side Palette -->
+<div id="examArea" style="display:none;">
+  <div id="examHeader">
+    <div id="stuInfo"></div>
+    <div id="stuQInfo"></div>
+    <div style="flex:0 0 auto;text-align:right; white-space:nowrap;">
+        <span id="timerEl">🕒 00:00</span>
+    </div>
+  </div>
+
+  <div class="exam-main-content">
+    <!-- Question Section -->
+    <div class="question-section">
+      <div id="questionContainer" class="question-container"></div>
+    </div>
+
+    <!-- Enhanced Side Palette with Apple Style Buttons -->
+    <div class="palette-section">
+      <div class="palette-header">📋 Question Palette (1-60)</div>
+      <div id="paletteContainer" class="palette-container"></div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="navContainer">
+    <button class="navBtn" id="prevBtn">⬅ Previous</button>
+    <button class="navBtn" id="markReviewBtn">Review</button>
+    <button class="navBtn" id="nextBtn">Next ➡</button>
+    <button class="navBtn" id="submitBtn">Submit Exam</button>
+  </div>
+</div>
+
+<!-- Summary Area -->
+<div id="summaryArea">
+  <div class="area-header">
+    <h2>📊 Exam Summary - <span id="summaryStudentName"></span></h2>
+    <div>
+      <b>Section:</b> <span id="summarySection"></span> | 
+      <b>Roll:</b> <span id="summaryRoll"></span> | 
+      <b>Admission No:</b> <span id="summaryAdm"></span> |
+      <b>Form:</b> <span id="summaryForm"></span>
+    </div>
+  </div>
+  
+  <div id="summaryTableContainer" style="overflow-x:auto;display:flex;justify-content:center;width:100%;"></div>
+  
+  <div style="text-align:center; margin:30px 0;">
+    <div id="autoTransitionMessage" class="auto-transition-message">
+      🔄 Auto-transitioning to detailed solutions in <span id="countdown">5</span> seconds...
+    </div>
+    <button id="closeSummaryBtn" class="navBtn" style="background:linear-gradient(145deg, #dc3545, #c82333);">Close</button>
+  </div>
+</div>
+
+<!-- Review Area -->
+<div id="reviewArea">
+  <div class="area-header">
+    <h2>📝 Detailed Solutions - <span id="reviewStudentName"></span></h2>
+    <div>
+      <b>Section:</b> <span id="reviewSection"></span> | 
+      <b>Roll:</b> <span id="reviewRoll"></span> | 
+      <b>Admission No:</b> <span id="reviewAdm"></span> |
+      <b>Form:</b> <span id="reviewForm"></span>
+    </div>
+  </div>
+  
+  <!-- Results Table in Detailed Solutions -->
+  <div id="detailedResultsContainer" style="overflow-x:auto;display:flex;justify-content:center;width:100%;margin:30px 0;"></div>
+  
+  <!-- Download Section -->
+  <div id="downloadSection" class="download-section">
+    <h4 style="color: #4B0082; margin-bottom: 15px;">📥 Download Your Answer Sheet</h4>
+    <button onclick="downloadStudentCSV()" class="download-btn">
+      💾 Download Complete Answer Sheet (CSV)
+    </button>
+    <p style="margin-top: 10px; color: #6c757d;">
+      <small>Contains all your answers in original question order (Q1, Q2, Q3...). Perfect for analysis in Excel.</small>
+    </p>
+  </div>
+  
+  <!-- Detailed Solutions Container -->
+  <div id="reviewQuestionsContainer"></div>
+  
+  <div style="text-align:center; margin:30px 0;">
+    <button id="closeReviewBtn" class="navBtn" style="background:linear-gradient(145deg, #dc3545, #c82333);">Close</button>
+  </div>
+</div>
+
+<footer>LFJC@2025 All rights reserved</footer>
+
+<!-- Security Overlays -->
+<div id="fullRedOverlay"></div>
+<div id="accessDeniedBox">
+  <h1>ACCESS DENIED</h1>
+  <button id="callAdminBtn" class="glow">Enter Password</button>
+</div>
+
+<!-- Modals -->
+<div class="confirmModal" id="confirmModal">
+  <div class="confirmBox">
+    <p id="confirmText">Confirm?</p>
+    <button id="confirmYes">Yes</button>
+    <button id="confirmNo">No</button>
+  </div>
+</div>
+
+<div id="adminPassModal">
+  <div id="adminPassBox">
+    <h3>Enter Admin Password</h3>
+    <input type="password" id="adminPassInput">
+    <br><br>
+    <button id="adminPassSubmit">Submit</button>
+  </div>
+</div>
+
+<!-- Enhanced Screenshot Protection -->
+<div id="screenshotProtection">
+  <div class="screenshot-dots"></div>
+</div>
+
+<script>
+// ===== CONFIGURATION =====
+const MARK_PER_CORRECT = 4, MARK_PER_WRONG = -1;
+const EXAM_DURATION_MINUTES = 10; // 10 minutes for testing
+const EXAM_DURATION_MS = EXAM_DURATION_MINUTES * 60 * 1000;
+const STORAGE_KEY_PREFIX = "lfjc_exam_";
+const MAX_QUESTIONS = 60;
+const ACCESS_CODE = "lfjc2025";
+const ADMIN_PASSWORD = "admin2025";
+const RESUBMISSION_PASSWORD = "resubmit2025";
+const RESUBMISSION_WINDOW_HOURS = 24;
+
+// ===== GOOGLE FORMS INTEGRATION =====
+const GOOGLE_FORMS = {
+    'A': "https://docs.google.com/forms/d/e/1FAIpQLSe4uuphhY4-p5jdTZqxG_ZZUKAhQZF1ytyNizPXb0n3L85JIw/formResponse",
+    'B': "https://docs.google.com/forms/d/e/1FAIpQLSc3JIcnUysvUtH12QWpHG9wAF4vd1NgEYqeyHwNP0UEkPqi5w/formResponse", 
+    'C': "https://docs.google.com/forms/d/e/1FAIpQLScqYdTGoD4l0jJvzYw0tdBNRSMPepnGtOOowOXYwDFov43KHg/formResponse",
+    'D': "https://docs.google.com/forms/d/e/1FAIpQLSfjAyDlY-5BAF5rPvzQS0AeTI6Vs2Rkri0V6_miA0mRivZAEg/formResponse",
+    'E': "https://docs.google.com/forms/d/e/1FAIpQLSfK6Skl6Uxj8VyGnhhqfdPHcJ8mbcgpzIKLpWFElzdeQSKMgA/formResponse",
+    'F': "https://docs.google.com/forms/d/e/1FAIpQLSeP-Gx2XnUg_Q17asOOeYzkoGtLykVIcQ2W006YTqTpE7xY6g/formResponse",
+    'G': "https://docs.google.com/forms/d/e/1FAIpQLSe1vg_I5XR3ljr-UNFi-MXxUgjdTDyrVbHxqi_dkvtmYGUTEA/formResponse",
+    'H': "https://docs.google.com/forms/d/e/1FAIpQLScyv8cps4StN2UXrsXqNdLu5UBR7t0Vwk8WSnynU2tvracs1g/formResponse",
+    'I': "https://docs.google.com/forms/d/e/1FAIpQLSeyen2hSdhRwztpWnH6lyuL91ZROqwDMKIaa4gN_e-Xvyvb_g/formResponse",
+    'J': "https://docs.google.com/forms/d/e/1FAIpQLSelbDi1n1EKWu7G0I92hTML6vWUO2c55p2dqrEOQ7cWflaSNg/formResponse"
+};
+
+const FORM_FIELDS = {
+    STUDENT_NAME: "entry.217666919",
+    SECTION: "entry.2006392966",
+    ROLL_NUMBER: "entry.547275105",
+    ADMISSION_NUMBER: "entry.1234063852",
+    MATHS_MARKS: "entry.1989859216",
+    PHYSICS_MARKS: "entry.1953974928",
+    CHEMISTRY_MARKS: "entry.296331194",
+    TOTAL_MARKS: "entry.1289040887",
+    TIMESTAMP: "entry.2139100252"
+};
+
+// ===== GLOBAL VARIABLES =====
+let images = [];
+let answerKey = [];
+let keyLoaded = false;
+let sheetReady = false;
+let hasSubmitted = false;
+let examStartTime = null;
+let waitingTimerInterval = null;
+let autoTransitionTimer = null;
+let examInProgress = false;
+let preloadedImages = {};
+let currentSubjData = null;
+let adminOverrideActive = false;
+let assignedForm = 'A';
+let isResubmission = false;
+let submissionInProgress = new Set();
+
+const subjects = ["Maths", "Physics", "Chemistry"];
+let examData = {files: [], subjectNames: [], keys: [], originalOrder: []};
+let progress = null, timerInterval = null;
+
+// ===== INITIALIZATION =====
+function initializeDemoData() {
+    // Create demo answer key for 60 questions
+    answerKey = [];
+    for (let i = 0; i < 60; i++) {
+        const options = ['A', 'B', 'C', 'D'];
+        answerKey.push(options[Math.floor(Math.random() * options.length)]);
+    }
+    
+    // Create demo image paths
+    for (let i = 1; i <= 60; i++) {
+        images.push(`questions/${i}.png`);
+    }
+    
+    keyLoaded = true;
+    clearErrors();
+    validateStudentInputs();
+    console.log('Loaded demo answer key for 60 questions');
+}
+
+// Initialize with demo data
+initializeDemoData();
+
+// ===== FORM DISTRIBUTION =====
+function getAssignedForm(studentData) {
+    const forms = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const formsCount = forms.length;
+    
+    if (studentData.roll && !isNaN(studentData.roll)) {
+        const rollNumber = parseInt(studentData.roll);
+        const formIndex = (rollNumber - 1) % formsCount;
+        return forms[formIndex];
+    }
+    
+    const hashString = `${studentData.name}|${studentData.roll}|${studentData.adm}`;
+    let hash = 0;
+    for (let i = 0; i < hashString.length; i++) {
+        hash = ((hash << 5) - hash) + hashString.charCodeAt(i);
+        hash = hash & hash;
+    }
+    return forms[Math.abs(hash) % formsCount];
+}
+
+function updateFormAssignmentDisplay(studentData) {
+    assignedForm = getAssignedForm(studentData);
+    document.getElementById('assignedFormDisplay').textContent = `FORM ${assignedForm}`;
+    document.getElementById('formAssignment').style.display = 'block';
+}
+
+// ===== GOOGLE FORMS SUBMISSION =====
+async function sendToGoogleFormWithGuarantee(subjData, studentData) {
+    const studentId = generateStudentId(studentData);
+    const submissionId = generateSubmissionId(studentData);
+    
+    console.log(`🚀 Starting submission for: ${studentData.name}`);
+    
+    if (submissionInProgress.has(studentId)) {
+        console.warn(`🚨 Submission already in progress for: ${studentData.name}`);
+        return true;
+    }
+    
+    if (hasStudentAlreadySubmitted(studentData)) {
+        console.warn(`🚨 Student already submitted: ${studentData.name}`);
+        return true;
+    }
+    
+    try {
+        submissionInProgress.add(studentId);
+        
+        if (hasStudentAlreadySubmitted(studentData)) {
+            console.warn(`🚨 Duplicate detected after lock: ${studentData.name}`);
+            return true;
+        }
+        
+        console.log(`📤 Attempting submission for: ${studentData.name}`);
+        const success = await submitToSingleForm(subjData, studentData);
+        
+        if (success) {
+            markAsSubmittedPermanently(studentData, submissionId);
+            console.log(`✅ SINGLE SUBMISSION SUCCESS: ${studentData.name}`);
+            return true;
+        } else {
+            console.error(`❌ Submission failed for: ${studentData.name}`);
+            return false;
+        }
+        
+    } catch (error) {
+        console.error(`💥 Submission error for ${studentData.name}:`, error);
+        return false;
+    } finally {
+        setTimeout(() => {
+            submissionInProgress.delete(studentId);
+        }, 5000);
+    }
+}
+
+function hasStudentAlreadySubmitted(studentData) {
+    const studentId = generateStudentId(studentData);
+    const checks = [
+        localStorage.getItem(`submitted_${studentId}`),
+        sessionStorage.getItem(`submitted_${studentId}`),
+        localStorage.getItem(`final_submission_${studentId}`)
+    ];
+    return checks.some(check => check !== null && check !== 'false');
+}
+
+function markAsSubmittedPermanently(studentData, submissionId) {
+    const studentId = generateStudentId(studentData);
+    const timestamp = Date.now();
+    
+    try {
+        localStorage.setItem(`submitted_${studentId}`, timestamp.toString());
+        localStorage.setItem(`final_submission_${studentId}`, timestamp.toString());
+        sessionStorage.setItem(`submitted_${studentId}`, timestamp.toString());
+        
+        const submissionRecord = {
+            studentId: studentId,
+            submissionId: submissionId,
+            timestamp: timestamp,
+            studentData: studentData,
+            assignedForm: assignedForm,
+            status: 'completed'
+        };
+        
+        const history = JSON.parse(localStorage.getItem('submission_history') || '[]');
+        history.push(submissionRecord);
+        if (history.length > 20) history.splice(0, history.length - 20);
+        localStorage.setItem('submission_history', JSON.stringify(history));
+        
+        console.log(`✅ PERMANENTLY MARKED AS SUBMITTED: ${studentData.name}`);
+    } catch (error) {
+        console.error('Failed to mark permanent submission:', error);
+    }
+}
+
+function generateStudentId(studentData) {
+    return `${studentData.name}_${studentData.sec}_${studentData.roll}_${studentData.adm}`
+        .toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-z0-9_]/g, '');
+}
+
+function generateSubmissionId(studentData) {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substr(2, 9);
+    return `sub_${generateStudentId(studentData)}_${timestamp}_${random}`;
+}
+
+async function submitToSingleForm(subjData, studentData) {
+    const FORM_URL = GOOGLE_FORMS[assignedForm];
+    
+    if (!FORM_URL) {
+        console.error(`No form URL for ${assignedForm}`);
+        return false;
+    }
+
+    const marks = calculateMarks(subjData);
+    const formData = new URLSearchParams();
+    formData.append(FORM_FIELDS.STUDENT_NAME, studentData.name);
+    formData.append(FORM_FIELDS.SECTION, studentData.sec);
+    formData.append(FORM_FIELDS.ROLL_NUMBER, studentData.roll);
+    formData.append(FORM_FIELDS.ADMISSION_NUMBER, studentData.adm);
+    formData.append(FORM_FIELDS.MATHS_MARKS, marks.mathsMarks.toFixed(2));
+    formData.append(FORM_FIELDS.PHYSICS_MARKS, marks.physicsMarks.toFixed(2));
+    formData.append(FORM_FIELDS.CHEMISTRY_MARKS, marks.chemistryMarks.toFixed(2));
+    formData.append(FORM_FIELDS.TOTAL_MARKS, marks.totalMarks.toFixed(2));
+    formData.append(FORM_FIELDS.TIMESTAMP, new Date().toLocaleString());
+
+    try {
+        console.log(`📝 Submitting to Form ${assignedForm}: ${FORM_URL}`);
+        await fetch(FORM_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        });
+        console.log(`✅ Form submission completed for: ${studentData.name}`);
+        return true;
+    } catch (error) {
+        console.error(`❌ Form submission error for ${studentData.name}:`, error);
+        return false;
+    }
+}
+
+function calculateMarks(subjData) {
+    let mathsMarks = 0, physicsMarks = 0, chemistryMarks = 0, totalMarks = 0;
+    
+    for (let subject in subjData) {
+        const subjectLower = subject.toLowerCase().trim();
+        const marks = subjData[subject].marks;
+        
+        if (subjectLower.includes('math')) mathsMarks = marks;
+        else if (subjectLower.includes('phys')) physicsMarks = marks;
+        else if (subjectLower.includes('chem')) chemistryMarks = marks;
+        totalMarks += marks;
+    }
+    
+    return { mathsMarks, physicsMarks, chemistryMarks, totalMarks };
+}
+
+// ===== INPUT VALIDATION =====
+function validateStudentInputs() {
+  const n = document.getElementById('stuName'), 
+        s = document.getElementById('stuSection'), 
+        r = document.getElementById('stuRoll'), 
+        a = document.getElementById('stuAdm');
+  
+  if (s.value) s.value = s.value.toUpperCase();
+  
+  let v1 = /^[A-Za-z .]+$/.test(n.value), 
+      v2 = /^[A-Za-z0-9]+$/.test(s.value),
+      v3 = /^[0-9]+$/.test(r.value), 
+      v4 = /^[0-9]+$/.test(a.value);
+  
+  n.classList.toggle('error', !v1 && n.value !== ""); 
+  s.classList.toggle('error', !v2 && s.value !== "");
+  r.classList.toggle('error', !v3 && r.value !== ""); 
+  a.classList.toggle('error', !v4 && a.value !== "");
+  
+  const startBtn = document.getElementById('stuStartBtn');
+  const allValid = v1 && v2 && v3 && v4 && keyLoaded;
+  startBtn.style.display = allValid ? "inline-block" : "none";
+  
+  if (!keyLoaded) showError("Answer key not loaded - exam disabled. Contact administrator.");
+  
+  if (v1 && v2 && v3 && v4) {
+    const studentData = { name: n.value, sec: s.value, roll: r.value, adm: a.value };
+    updateFormAssignmentDisplay(studentData);
+    
+    // TESTING: Always show resubmission section for testing
+    // In production, use: checkResubmission(studentData);
+    document.getElementById('resubmissionSection').style.display = 'block';
+    document.getElementById('stuStartBtn').style.display = 'none';
+  }
+  
+  return allValid;
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessages');
+    errorDiv.innerHTML = `<div class="error-message">${message}</div>`;
+}
+
+function clearErrors() {
+    document.getElementById('errorMessages').innerHTML = '';
+}
+
+// ===== RESUBMISSION FUNCTIONALITY =====
+function checkResubmission(studentData) {
+    const studentId = generateStudentId(studentData);
+    const previousSubmission = localStorage.getItem(`submission_${studentId}`);
+    
+    if (previousSubmission) {
+        const submissionData = JSON.parse(previousSubmission);
+        const submissionTime = new Date(submissionData.timestamp);
+        const currentTime = new Date();
+        const hoursSinceSubmission = (currentTime - submissionTime) / (1000 * 60 * 60);
+        
+        if (hoursSinceSubmission < RESUBMISSION_WINDOW_HOURS) {
+            document.getElementById('resubmissionSection').style.display = 'block';
+            document.getElementById('stuStartBtn').style.display = 'none';
+            return true;
+        }
+    }
+    
+    document.getElementById('resubmissionSection').style.display = 'none';
+    document.getElementById('stuStartBtn').style.display = 'inline-block';
+    return false;
+}
+
+function verifyResubmissionPassword() {
+    const enteredPassword = document.getElementById('resubmissionPassword').value.trim();
+    
+    if (enteredPassword === RESUBMISSION_PASSWORD) {
+        isResubmission = true;
+        document.getElementById('resubmissionSection').style.display = 'none';
+        document.getElementById('stuStartBtn').style.display = 'inline-block';
+        document.getElementById('errorMessages').innerHTML = '<div class="success-message">✅ Password verified. You can now start the exam.</div>';
+        return true;
+    } else {
+        document.getElementById('errorMessages').innerHTML = '<div class="error-message">❌ Incorrect password. Please try again.</div>';
+        document.getElementById('resubmissionPassword').value = '';
+        document.getElementById('resubmissionPassword').focus();
+        return false;
+    }
+}
+
+function cancelResubmission() {
+    document.getElementById('resubmissionSection').style.display = 'none';
+    document.getElementById('resubmissionPassword').value = '';
+    document.getElementById('errorMessages').innerHTML = '';
+    isResubmission = false;
+}
+
+// ===== ACCESS CODE VERIFICATION =====
+function verifyAccessCode() {
+    const enteredCode = document.getElementById('accessCode').value.trim();
+    const errorElement = document.getElementById('accessError');
+    const accessDenied = document.getElementById('accessDenied');
+    
+    errorElement.style.display = 'none';
+    
+    if (enteredCode === ACCESS_CODE) {
+        accessDenied.style.display = 'none';
+        document.getElementById('studentEntry').style.display = 'flex';
+        document.getElementById('accessCode').value = '';
+        document.getElementById('stuName').focus();
+    } else {
+        errorElement.style.display = 'block';
+        document.getElementById('accessCode').value = '';
+        document.getElementById('accessCode').focus();
+        accessDenied.style.animation = 'shake 0.5s';
+        setTimeout(() => accessDenied.style.animation = '', 500);
+    }
+}
+
+// ===== SECURITY MEASURES =====
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+
+document.addEventListener('keydown', function(e) {
+    if (e.keyCode === 123 || 
+        (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
+        (e.ctrlKey && e.shiftKey && e.keyCode === 74) ||
+        (e.ctrlKey && e.keyCode === 85) ||
+        (e.ctrlKey && e.keyCode === 83) ||
+        (e.ctrlKey && e.keyCode === 80) ||
+        e.keyCode === 44 ||
+        (e.ctrlKey && e.key === 'p') ||
+        (e.metaKey && e.key === 'p')) {
+        e.preventDefault(); e.stopPropagation(); return false;
+    }
+});
+
+// ===== TAB SWITCH DETECTION =====
+let tabSwitchCount = 0;
+let lastTabSwitchTime = 0;
+const MAX_TAB_SWITCHES = 3;
+const TAB_SWITCH_WINDOW_MS = 30000;
+
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden && examInProgress) {
+        const currentTime = Date.now();
+        if (currentTime - lastTabSwitchTime > TAB_SWITCH_WINDOW_MS) tabSwitchCount = 0;
+        tabSwitchCount++;
+        lastTabSwitchTime = currentTime;
+        
+        console.log(`Tab switch detected: ${tabSwitchCount}/${MAX_TAB_SWITCHES}`);
+        
+        if (tabSwitchCount >= MAX_TAB_SWITCHES) {
+            alert('⚠️ Multiple tab switches detected. Exam will be submitted automatically for security.');
+            submitExam();
+        } else {
+            alert(`⚠️ Warning: Tab switching detected (${tabSwitchCount}/${MAX_TAB_SWITCHES}). Multiple switches may result in automatic submission.`);
+        }
+    }
+});
+
+// ===== EVENT LISTENERS =====
+["stuName", "stuSection", "stuRoll", "stuAdm"].forEach(id => {
+  document.getElementById(id).addEventListener("input", validateStudentInputs);
+});
+
+document.getElementById('stuStartBtn').onclick = () => { 
+  if (!validateStudentInputs()) return; 
+  showConfirm("Start Exam?", startWithSecurity); 
+};
+
+document.getElementById('verifyResubmission').addEventListener('click', verifyResubmissionPassword);
+document.getElementById('cancelResubmission').addEventListener('click', cancelResubmission);
+document.getElementById('resubmissionPassword').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') verifyResubmissionPassword();
+});
+document.getElementById('verifyAccess').addEventListener('click', verifyAccessCode);
+document.getElementById('accessCode').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') verifyAccessCode();
+});
+
+// ===== EXAM PREPARATION =====
+function shuffleArray(arr) {
+    const c = arr.slice();
+    for (let i = c.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [c[i], c[j]] = [c[j], c[i]];
+    }
+    return c;
+}
+
+function prepareExamData() {
+  examData.files = []; examData.subjectNames = []; examData.keys = []; examData.originalOrder = [];
+  
+  const subjectRanges = [
+    { name: "Maths", start: 1, end: 30 },
+    { name: "Physics", start: 31, end: 45 },
+    { name: "Chemistry", start: 46, end: 60 }
+  ];
+  
+  let groups = [];
+  
+  subjectRanges.forEach(subject => {
+    const subjectQuestions = [];
+    const subjectKeys = [];
+    const subjectOriginalOrder = [];
+    
+    for (let i = subject.start; i <= subject.end; i++) {
+      const imgIndex = i - 1;
+      if (images[imgIndex] && answerKey[imgIndex]) {
+        subjectQuestions.push(images[imgIndex]);
+        subjectKeys.push(answerKey[imgIndex]);
+        subjectOriginalOrder.push(imgIndex);
+      }
+    }
+    
+    const shuffledIndices = shuffleArray([...Array(subjectQuestions.length).keys()]);
+    
+    groups.push({
+      name: subject.name,
+      imgs: shuffledIndices.map(i => subjectQuestions[i]),
+      keys: shuffledIndices.map(i => subjectKeys[i]),
+      originalOrder: shuffledIndices.map(i => subjectOriginalOrder[i])
+    });
+  });
+  
+  const shuffledGroups = shuffleArray(groups);
+  
+  shuffledGroups.forEach(g => {
+    g.imgs.forEach((img, i) => {
+      examData.files.push(img);
+      examData.keys.push(g.keys[i]);
+      examData.subjectNames.push(g.name);
+      examData.originalOrder.push(g.originalOrder[i]);
+    });
+  });
+  
+  console.log("Final exam structure:");
+  console.log("Maths:", examData.subjectNames.filter(s => s === "Maths").length);
+  console.log("Physics:", examData.subjectNames.filter(s => s === "Physics").length);
+  console.log("Chemistry:", examData.subjectNames.filter(s => s === "Chemistry").length);
+}
+
+// ===== EXAM START =====
+function startWithSecurity(ok) {
+  if (!ok) return;
+  const stuName = document.getElementById('stuName');
+  const stuSection = document.getElementById('stuSection');
+  const stuRoll = document.getElementById('stuRoll');
+  const stuAdm = document.getElementById('stuAdm');
+  
+  const studentKey = `${stuName.value}|${stuSection.value}|${stuRoll.value}|${stuAdm.value}`;
+  const stored = localStorage.getItem(studentKey), now = Date.now();
+  if (stored && now - stored < 86400000 && !adminOverrideActive && !isResubmission) {
+      document.getElementById('fullRedOverlay').style.display = "block"; 
+      document.getElementById('accessDeniedBox').style.display = "block";
+      document.getElementById('callAdminBtn').onclick = () => {
+          document.getElementById('adminPassModal').style.display = "flex";
+          document.getElementById('adminPassInput').focus();
+          document.getElementById('adminPassSubmit').onclick = () => {
+              const adminPassInput = document.getElementById('adminPassInput');
+              if (adminPassInput.value === ADMIN_PASSWORD) {
+                  adminOverrideActive = true;
+                  document.getElementById('adminPassModal').style.display = "none";
+                  document.getElementById('fullRedOverlay').style.display = "none"; 
+                  document.getElementById('accessDeniedBox').style.display = "none";
+                  startExam(studentKey);
+              } else alert("Incorrect password!");
+          };
+      };
+  } else {
+      startExam(studentKey);
+  }
+}
+
+function startExam(studentKey) {
+  if (!keyLoaded) {
+    alert('Answer key not loaded. Contact admin.');
+    return;
+  }
+
+  const stuName = document.getElementById('stuName');
+  const stuSection = document.getElementById('stuSection');
+  const stuRoll = document.getElementById('stuRoll');
+  const stuAdm = document.getElementById('stuAdm');
+
+  localStorage.setItem(studentKey, Date.now());
+  prepareExamData();
+  progress = {
+    answers: Array(examData.files.length).fill(null),
+    review: Array(examData.files.length).fill(false),
+    currentIndex: 0,
+    student: {name: stuName.value, sec: stuSection.value, roll: stuRoll.value, adm: stuAdm.value},
+    timeLeftSec: EXAM_DURATION_MINUTES * 60
+  };
+
+  examStartTime = Date.now();
+  examInProgress = true;
+  tabSwitchCount = 0;
+  lastTabSwitchTime = 0;
+  
+  document.getElementById('studentEntry').style.display = "none";
+  document.getElementById('examArea').style.display = "block";
+  renderQuestion(); renderPalette(); startTimer(); updateNavButtons();
+  
+  sheetReady = true;
+}
+
+// ===== RENDER QUESTION =====
+function renderQuestion() {
+  const idx = progress.currentIndex;
+  const container = document.getElementById('questionContainer');
+  
+  container.innerHTML = `
+    <div class="question-transition question-fade-in">
+      <div class="sectionTitle">${examData.subjectNames[idx]}</div>
+      <div style="width: 100%; overflow: auto;">
+        <img src="${examData.files[idx]}" class="questionImg" alt="Question ${idx+1}" 
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <div class="image-error" style="display:none;">
+          <h3>⚠️ Image Not Available</h3>
+          <p>Question image could not be loaded. Please contact administrator.</p>
+        </div>
+      </div>
+      <div class="options-container">
+        <button class="optBtn ${progress.answers[idx] === 'A' ? 'selected' : ''}" data-opt="A">A</button>
+        <button class="optBtn ${progress.answers[idx] === 'B' ? 'selected' : ''}" data-opt="B">B</button>
+        <button class="optBtn ${progress.answers[idx] === 'C' ? 'selected' : ''}" data-opt="C">C</button>
+        <button class="optBtn ${progress.answers[idx] === 'D' ? 'selected' : ''}" data-opt="D">D</button>
+      </div>
+    </div>
+  `;
+  
+  document.querySelectorAll('.optBtn').forEach(btn => {
+    btn.onclick = function() { selectOption(this.getAttribute('data-opt')); };
+  });
+  
+  updateQuestionInfo();
+  updatePalette();
+}
+
+function selectOption(opt) {
+  const idx = progress.currentIndex;
+  if (progress.answers[idx] === opt) {
+    progress.answers[idx] = null;
+    console.log(`Deselected option ${opt} for question ${idx + 1}`);
+  } else {
+    progress.answers[idx] = opt;
+    console.log(`Selected option ${opt} for question ${idx + 1}`);
+  }
+  updateOptionButtons();
+  updatePalette();
+}
+
+function updateOptionButtons() {
+  const idx = progress.currentIndex;
+  const currentAnswer = progress.answers[idx];
+  document.querySelectorAll('.optBtn').forEach(btn => {
+    const btnOpt = btn.getAttribute('data-opt');
+    btn.classList.toggle('selected', btnOpt === currentAnswer);
+  });
+}
+
+function updateQuestionInfo() {
+  const idx = progress.currentIndex;
+  const stuInfoEl = document.getElementById('stuInfo');
+  const stuQInfoEl = document.getElementById('stuQInfo');
+  
+  if (stuInfoEl) stuInfoEl.textContent = `${progress.student.name} | ${progress.student.sec} | Roll: ${progress.student.roll}`;
+  if (stuQInfoEl) stuQInfoEl.textContent = `Q${idx+1} of ${examData.files.length} | ${examData.subjectNames[idx]}`;
+}
+
+// ===== PALETTE FUNCTIONS =====
+function renderPalette() {
+  const container = document.getElementById('paletteContainer');
+  container.innerHTML = '';
+  
+  for (let i = 0; i < examData.files.length; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'palette-btn';
+    btn.textContent = i + 1;
+    
+    // Set initial state
+    if (progress.answers[i] !== null) btn.classList.add('selected');
+    if (progress.review[i]) btn.classList.add('reviewed');
+    if (i === progress.currentIndex) btn.classList.add('current');
+    
+    btn.onclick = () => {
+      progress.currentIndex = i;
+      renderQuestion();
+      updateNavButtons();
+    };
+    
+    container.appendChild(btn);
+  }
+}
+
+function updatePalette() {
+  const buttons = document.querySelectorAll('.palette-btn');
+  buttons.forEach((btn, i) => {
+    btn.className = 'palette-btn';
+    if (progress.answers[i] !== null) btn.classList.add('selected');
+    if (progress.review[i]) btn.classList.add('reviewed');
+    if (i === progress.currentIndex) btn.classList.add('current');
+  });
+}
+
+// ===== NAVIGATION FUNCTIONS =====
+function updateNavButtons() {
+  const idx = progress.currentIndex;
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const markReviewBtn = document.getElementById('markReviewBtn');
+  
+  prevBtn.disabled = idx === 0;
+  nextBtn.disabled = idx === examData.files.length - 1;
+  
+  if (progress.review[idx]) {
+    markReviewBtn.textContent = 'Unmark Review';
+    markReviewBtn.style.background = 'linear-gradient(145deg, #dc3545, #c82333)';
+  } else {
+    markReviewBtn.textContent = 'Mark for Review';
+    markReviewBtn.style.background = 'linear-gradient(145deg, #ffb84d, var(--warning))';
+  }
+}
+
+document.getElementById('prevBtn').onclick = () => {
+  if (progress.currentIndex > 0) {
+    progress.currentIndex--;
+    renderQuestion();
+    updateNavButtons();
+  }
+};
+
+document.getElementById('nextBtn').onclick = () => {
+  if (progress.currentIndex < examData.files.length - 1) {
+    progress.currentIndex++;
+    renderQuestion();
+    updateNavButtons();
+  }
+};
+
+document.getElementById('markReviewBtn').onclick = () => {
+  const idx = progress.currentIndex;
+  progress.review[idx] = !progress.review[idx];
+  updateNavButtons();
+  updatePalette();
+};
+
+document.getElementById('submitBtn').onclick = () => {
+  showConfirm("Submit Exam? You cannot change answers after submission.", submitExam);
+};
+
+// ===== TIMER FUNCTIONS =====
+function startTimer() {
+  timerInterval = setInterval(() => {
+    progress.timeLeftSec--;
+    
+    const minutes = Math.floor(progress.timeLeftSec / 60);
+    const seconds = progress.timeLeftSec % 60;
+    const timerEl = document.getElementById('timerEl');
+    
+    timerEl.textContent = `🕒 ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (progress.timeLeftSec <= 300) timerEl.classList.add('blink');
+    
+    if (progress.timeLeftSec <= 0) {
+      clearInterval(timerInterval);
+      submitExam();
+    }
+  }, 1000);
+}
+
+// ===== SUBMISSION FUNCTIONS =====
+function submitExam() {
+  if (hasSubmitted) return;
+  clearInterval(timerInterval);
+  
+  hasSubmitted = true;
+  examInProgress = false;
+  
+  const subjData = {};
+  examData.subjectNames.forEach((s, i) => {
+    const subjectName = identifySubject(s);
+    if (!subjData[subjectName]) subjData[subjectName] = {correct: 0, wrong: 0, blank: 0, total: 0, marks: 0};
+    
+    const ans = progress.answers[i];
+    if (ans === null) {
+      subjData[subjectName].blank++;
+    } else if (ans === examData.keys[i]) {
+      subjData[subjectName].correct++;
+      subjData[subjectName].marks += MARK_PER_CORRECT;
+    } else {
+      subjData[subjectName].wrong++;
+      subjData[subjectName].marks += MARK_PER_WRONG;
+    }
+    subjData[subjectName].total++;
+  });
+
+  currentSubjData = subjData;
+  
+  console.log("🎯 FINAL SUBMISSION DATA:");
+  console.log("Student:", progress.student.name);
+  console.log("Re-submission:", isResubmission);
+  console.log("All Answers:", progress.answers);
+
+  // Submit to Google Forms
+  sendToGoogleFormWithGuarantee(subjData, progress.student);
+  
+  // Show summary immediately
+  showSummaryInterface(subjData);
+}
+
+// ===== DETAILED SOLUTIONS =====
+function showDetailedSolutions() {
+  document.getElementById('summaryArea').style.display = 'none';
+  document.getElementById('reviewArea').style.display = 'block';
+  
+  document.getElementById('reviewStudentName').textContent = progress.student.name;
+  document.getElementById('reviewSection').textContent = progress.student.sec;
+  document.getElementById('reviewRoll').textContent = progress.student.roll;
+  document.getElementById('reviewAdm').textContent = progress.student.adm;
+  document.getElementById('reviewForm').textContent = assignedForm;
+  
+  // Create detailed results table
+  const table = document.createElement('table');
+  table.className = 'detailed-results-table';
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Correct</th>
+        <th>Wrong</th>
+        <th>Blank</th>
+        <th>Total</th>
+        <th>Marks</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${Object.entries(currentSubjData).map(([subject, data]) => `
+        <tr>
+          <td>${subject}</td>
+          <td>${data.correct}</td>
+          <td>${data.wrong}</td>
+          <td>${data.blank}</td>
+          <td>${data.total}</td>
+          <td>${data.marks.toFixed(2)}</td>
+        </tr>
+      `).join('')}
+      <tr class="total-row">
+        <td><strong>Total</strong></td>
+        <td><strong>${Object.values(currentSubjData).reduce((sum, d) => sum + d.correct, 0)}</strong></td>
+        <td><strong>${Object.values(currentSubjData).reduce((sum, d) => sum + d.wrong, 0)}</strong></td>
+        <td><strong>${Object.values(currentSubjData).reduce((sum, d) => sum + d.blank, 0)}</strong></td>
+        <td><strong>${Object.values(currentSubjData).reduce((sum, d) => sum + d.total, 0)}</strong></td>
+        <td><strong>${Object.values(currentSubjData).reduce((sum, d) => sum + d.marks, 0).toFixed(2)}</strong></td>
+      </tr>
+    </tbody>
+  `;
+  
+  document.getElementById('detailedResultsContainer').innerHTML = '';
+  document.getElementById('detailedResultsContainer').appendChild(table);
+  
+  // Generate detailed solutions
+  const solutionsContainer = document.getElementById('reviewQuestionsContainer');
+  solutionsContainer.innerHTML = '<h3 style="text-align:center; color:#4B0082; margin:30px 0;">Detailed Question Solutions</h3>';
+  
+  for (let i = 0; i < examData.files.length; i++) {
+    const solutionDiv = document.createElement('div');
+    solutionDiv.className = 'solution-container';
+    
+    const studentAnswer = progress.answers[i];
+    const correctAnswer = examData.keys[i];
+    const isCorrect = studentAnswer === correctAnswer;
+    
+    solutionDiv.innerHTML = `
+      <div class="solution-question">Question ${i+1} (${examData.subjectNames[i]})</div>
+      <div class="solution-answer ${isCorrect ? 'solution-correct' : 'solution-wrong'}">
+        <strong>Your Answer:</strong> ${studentAnswer || 'Not Attempted'} 
+        ${!isCorrect && studentAnswer ? ` | <strong>Correct Answer:</strong> ${correctAnswer}` : ''}
+        ${isCorrect ? ' ✅' : ' ❌'}
+      </div>
+      <div class="solution-explanation">
+        This question was from ${examData.subjectNames[i]} section. 
+        ${isCorrect ? 'You answered correctly!' : studentAnswer ? 'Your answer was incorrect.' : 'You did not attempt this question.'}
+      </div>
+    `;
+    
+    solutionsContainer.appendChild(solutionDiv);
+  }
+  
+  document.getElementById('closeReviewBtn').onclick = () => {
+    document.getElementById('reviewArea').style.display = 'none';
+    document.getElementById('studentEntry').style.display = 'flex';
+    resetForm();
+  };
+}
+
+// ===== SUMMARY INTERFACE =====
+function showSummaryInterface(subjData) {
+  document.getElementById('examArea').style.display = 'none';
+  document.getElementById('summaryArea').style.display = 'block';
+  
+  document.getElementById('summaryStudentName').textContent = progress.student.name;
+  document.getElementById('summarySection').textContent = progress.student.sec;
+  document.getElementById('summaryRoll').textContent = progress.student.roll;
+  document.getElementById('summaryAdm').textContent = progress.student.adm;
+  document.getElementById('summaryForm').textContent = assignedForm;
+  
+  // Create summary table
+  const table = document.createElement('table');
+  table.className = 'results-table';
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Correct</th>
+        <th>Wrong</th>
+        <th>Blank</th>
+        <th>Total</th>
+        <th>Marks</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${Object.entries(subjData).map(([subject, data]) => `
+        <tr>
+          <td>${subject}</td>
+          <td>${data.correct}</td>
+          <td>${data.wrong}</td>
+          <td>${data.blank}</td>
+          <td>${data.total}</td>
+          <td>${data.marks.toFixed(2)}</td>
+        </tr>
+      `).join('')}
+      <tr class="total-row">
+        <td><strong>Total</strong></td>
+        <td><strong>${Object.values(subjData).reduce((sum, d) => sum + d.correct, 0)}</strong></td>
+        <td><strong>${Object.values(subjData).reduce((sum, d) => sum + d.wrong, 0)}</strong></td>
+        <td><strong>${Object.values(subjData).reduce((sum, d) => sum + d.blank, 0)}</strong></td>
+        <td><strong>${Object.values(subjData).reduce((sum, d) => sum + d.total, 0)}</strong></td>
+        <td><strong>${Object.values(subjData).reduce((sum, d) => sum + d.marks, 0).toFixed(2)}</strong></td>
+      </tr>
+    </tbody>
+  `;
+  
+  document.getElementById('summaryTableContainer').innerHTML = '';
+  document.getElementById('summaryTableContainer').appendChild(table);
+  
+  // Auto transition to detailed solutions
+  document.getElementById('autoTransitionMessage').style.display = 'block';
+  let countdown = 5;
+  document.getElementById('countdown').textContent = countdown;
+  
+  const countdownInterval = setInterval(() => {
+    countdown--;
+    document.getElementById('countdown').textContent = countdown;
+    if (countdown <= 0) {
+      clearInterval(countdownInterval);
+      showDetailedSolutions();
+    }
+  }, 1000);
+  
+  document.getElementById('closeSummaryBtn').onclick = () => {
+    clearInterval(countdownInterval);
+    document.getElementById('summaryArea').style.display = 'none';
+    document.getElementById('studentEntry').style.display = 'flex';
+    resetForm();
+  };
+}
+
+// ===== UTILITY FUNCTIONS =====
+function identifySubject(subjectName) {
+  if (subjectName.includes('Math')) return 'Mathematics';
+  if (subjectName.includes('Phy')) return 'Physics';
+  if (subjectName.includes('Chem')) return 'Chemistry';
+  return subjectName;
+}
+
+function resetForm() {
+  document.getElementById('stuName').value = '';
+  document.getElementById('stuSection').value = '';
+  document.getElementById('stuRoll').value = '';
+  document.getElementById('stuAdm').value = '';
+  document.getElementById('formAssignment').style.display = 'none';
+  validateStudentInputs();
+}
+
+// ===== CONFIRMATION MODAL =====
+function showConfirm(message, callback) {
+  const modal = document.getElementById('confirmModal');
+  const text = document.getElementById('confirmText');
+  const yesBtn = document.getElementById('confirmYes');
+  const noBtn = document.getElementById('confirmNo');
+  
+  text.textContent = message;
+  modal.style.display = 'flex';
+  
+  yesBtn.onclick = () => { modal.style.display = 'none'; callback(true); };
+  noBtn.onclick = () => { modal.style.display = 'none'; callback(false); };
+}
+
+// ===== ADMIN PASSWORD =====
+document.getElementById('adminPassSubmit').addEventListener('click', function() {
+  const adminPassInput = document.getElementById('adminPassInput');
+  if (adminPassInput.value === ADMIN_PASSWORD) {
+    adminOverrideActive = true;
+    document.getElementById('adminPassModal').style.display = 'none';
+    document.getElementById('fullRedOverlay').style.display = 'none';
+    document.getElementById('accessDeniedBox').style.display = 'none';
+    
+    const stuName = document.getElementById('stuName');
+    const stuSection = document.getElementById('stuSection');
+    const stuRoll = document.getElementById('stuRoll');
+    const stuAdm = document.getElementById('stuAdm');
+    const studentKey = `${stuName.value}|${stuSection.value}|${stuRoll.value}|${stuAdm.value}`;
+    startExam(studentKey);
+  } else {
+    alert("Incorrect password!");
+    adminPassInput.value = '';
+    adminPassInput.focus();
+  }
+});
+
+document.getElementById('adminPassInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') document.getElementById('adminPassSubmit').click();
+});
+
+// ===== DOWNLOAD FUNCTION =====
+function downloadStudentCSV() {
+  let csvContent = "Question,Subject,Your Answer,Correct Answer,Status\n";
+  
+  for (let i = 0; i < examData.files.length; i++) {
+    const studentAnswer = progress.answers[i] || 'Not Attempted';
+    const correctAnswer = examData.keys[i];
+    const status = studentAnswer === correctAnswer ? 'Correct' : 
+                  studentAnswer === 'Not Attempted' ? 'Not Attempted' : 'Wrong';
+    
+    csvContent += `${i+1},${examData.subjectNames[i]},${studentAnswer},${correctAnswer},${status}\n`;
+  }
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('hidden', '');
+  a.setAttribute('href', url);
+  a.setAttribute('download', `exam_results_${progress.student.name}_${progress.student.roll}.csv`);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('examArea').style.display === 'block') {
+    const keyMap = {'1': 'A', '2': 'B', '3': 'C', '4': 'D'};
+    if (keyMap[e.key]) {
+      e.preventDefault();
+      selectOption(keyMap[e.key]);
+    }
+  }
+});
+
+// ===== INITIAL SETUP =====
+window.addEventListener('load', function() {
+  console.log('LFJC Online Exam System Initialized');
+  
+  document.getElementById('accessDenied').style.display = 'flex';
+  document.getElementById('studentEntry').style.display = 'none';
+  document.getElementById('examArea').style.display = 'none';
+  document.getElementById('summaryArea').style.display = 'none';
+  document.getElementById('reviewArea').style.display = 'none';
+  
+  document.getElementById('accessCode').focus();
+});
+
+console.log("🎯 LFJC Online Exam System Loaded Successfully");
+console.log("🔄 Toggle Selection: Click option to select, click again to deselect");
+console.log("⌨️ Keyboard Shortcuts: Press 1,2,3,4 for options A,B,C,D");
+console.log("📊 Questions: 60 total (30 Maths, 15 Physics, 15 Chemistry)");
+console.log("🎨 Apple Style Palette: Beautiful circular buttons with smooth animations");
+console.log("🔐 Resubmission: 24-hour password protection enabled");
+</script>
+</body>
+</html>
